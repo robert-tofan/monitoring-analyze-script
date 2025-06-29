@@ -63,7 +63,29 @@ def analyze_logs(log_entries):
             if duration > ERROR_THRESHOLD:
                 report.append(f"ERROR: Job {job_id} ({description}) took too long to complete above threshold of 10 min: {duration_str}")
             elif duration > WARNING_THRESHOLD:
-                report.append(f"WARNING: Job {job_id} ({description}) took longer than expected above threshhold of 5 min: {duration_str}")
+                report.append(f"WARNING: Job {job_id} ({description}) completed on low performance above threshhold of 5 min: {duration_str}")
+        elif start_time and not end_time:
+            # Job started but it's still running
+            start_datetime = datetime.combine(today, start_time)
+            elapsed = now - start_datetime
+            if now < start_datetime:
+                # If elapsed time is negative, it means the job started yesterday
+                elapsed = now + timedelta(days=1) - start_datetime
+            duration_seconds = elapsed.total_seconds()
+            hours = int(duration_seconds // 3600)
+            minutes = int((duration_seconds % 3600) // 60)
+            seconds = int(duration_seconds % 60)
+            duration_str = f"{hours}:{minutes:02d}:{seconds:02d}"
+            # Check if the job duration exceeds thresholds
+            if elapsed > ERROR_THRESHOLD:
+                report.append(f"ERROR: Job {job_id} ({description}) is still running and exceeded 10 minutes: {duration_str}")
+            elif elapsed > WARNING_THRESHOLD:
+                report.append(f"WARNING: Job {job_id} ({description}) is still running and exceeded 5 minutes: {duration_str}")
+        elif not start_time and end_time:
+            # Job has an end time but no start time, which is logically inconsistent
+            end_time_str = end_time.strftime('%H:%M:%S')
+            report.append(f"ERROR: Job {job_id} ({description}) has an end time ({end_time_str}) without a start time")
+            
     return report
 
 def main():
@@ -72,7 +94,7 @@ def main():
     log_file_path = './logs.log'
     output_file_path = f"./output_logs/analysed_logs_{current_time}.log"
     # Set up logging configuration
-    logging.basicConfig(filename=output_file_path, level=logging.INFO, format='%(message)s')
+    logging.basicConfig(filename=output_file_path, level=logging.INFO, format='%(asctime)s: %(message)s', datefmt='%Y-%m-%d %H:%M')
     with open(log_file_path, 'r') as file:
         logs_entries =[]
         # Read each line from the log file and parse it into structured entries

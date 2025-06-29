@@ -6,19 +6,27 @@ ERROR_THRESHOLD = timedelta(minutes=10)
 
 # Function to parse a single log entry and split intems by commas
 def parse_log_entry(line):
-
-    parts = line.strip().split(',')
-    timestamp_str = parts[0].strip()
-    timestamp = datetime.strptime(timestamp_str, '%H:%M:%S').time()
-    description = parts[1].strip()
-    status = parts[2].strip()
-    job_id = parts[3].strip()
-    return {
-        'timestamp': timestamp,
-        'description': description,
-        'status': status,
-        'job_id': job_id
-    }
+        
+    try:
+        parts = line.strip().split(',')
+        # Check if the log line has exactly 4 parts: timestamp, description, status, job_id
+        if len(parts) != 4:
+            raise ValueError("Invalid log line: incorrect number of fields")
+        timestamp_str = parts[0].strip()
+        timestamp = datetime.strptime(timestamp_str, '%H:%M:%S').time()
+        description = parts[1].strip()
+        status = parts[2].strip()
+        job_id = parts[3].strip()
+        return {
+            'timestamp': timestamp,
+            'description': description,
+            'status': status,
+            'job_id': job_id
+        }
+    except ValueError as e:
+        # Log the error with a message indicating the line that caused the issue
+        print(f"Error parsing line: {line.strip()} (Error: {e})")
+        return None
     
 
 def analyze_logs(log_entries):
@@ -94,22 +102,30 @@ def main():
     log_file_path = './logs.log'
     output_file_path = f"./output_logs/analysed_logs_{current_time}.log"
     # Set up logging configuration
-    logging.basicConfig(filename=output_file_path, level=logging.INFO, format='%(asctime)s: %(message)s', datefmt='%Y-%m-%d %H:%M')
-    with open(log_file_path, 'r') as file:
-        logs_entries =[]
-        # Read each line from the log file and parse it into structured entries
-        # Skip empty lines to avoid parsing errors
-        for line in file:
-            if line.strip():
-                entry = parse_log_entry(line)
-                logs_entries.append(entry)
+    try:
+        logging.basicConfig(filename=output_file_path, level=logging.INFO, format='%(asctime)s: %(message)s', datefmt='%Y-%m-%d %H:%M')
+        with open(log_file_path, 'r') as file:
+            logs_entries =[]
+            # Read each line from the log file and parse it into structured entries
+            # Skip empty lines to avoid parsing errors
+            for line in file:
+                if line.strip():
+                    entry = parse_log_entry(line)
+                    logs_entries.append(entry)
 
-    logs_report = analyze_logs(logs_entries)
-    for message in logs_report:
-        if message.startswith("ERROR"):
-            logging.error(message)
-        elif message.startswith("WARNING"):
-            logging.warning(message)
+        logs_report = analyze_logs(logs_entries)
+        for message in logs_report:
+            if message.startswith("ERROR"):
+                logging.error(message)
+            elif message.startswith("WARNING"):
+                logging.warning(message)
+    # Throw an error if the log file is not found or if there are parsing issues
+    except FileNotFoundError:
+        print(f"Log file {log_file_path} not found. Please ensure the file exists.")
+    except Exception as e:
+        print(f"An error occurred while processing the log file: {e}")
+    
+
 
 if __name__ == "__main__":
     main()

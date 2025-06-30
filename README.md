@@ -45,7 +45,7 @@ The application uses configuration files for easy customization:
 
 ## Project Structure
 
-    log_monitoring_app/
+    monitoring_analyze_script/
     ├── analyze_log_script.py             # Main script that reads logs and generates report
     ├── config.py                         # Parameters for analyze_log_script.py
     ├── logs.log                          # Sample log file for testing 

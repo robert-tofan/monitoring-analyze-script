@@ -1,8 +1,6 @@
 from datetime import datetime, timedelta
+from config import WARNING_THRESHOLD, ERROR_THRESHOLD, LOG_FILE_PATH, OUTPUT_FILE_PATH
 import logging
-
-WARNING_THRESHOLD = timedelta(minutes=5)
-ERROR_THRESHOLD = timedelta(minutes=10)
 
 # Function to parse a single log entry and split intems by commas
 def parse_log_entry(line):
@@ -97,13 +95,9 @@ def analyze_logs(log_entries):
     return report
 
 def main():
-    # Prepare logging to file
-    current_time = datetime.now().strftime('%Y%m%d%H%M')
-    log_file_path = './logs.log'
-    output_file_path = f"./output_logs/analysed_logs_{current_time}.log"
     # Set up logging configuration
     try:
-        with open(log_file_path, 'r') as file:
+        with open(LOG_FILE_PATH, 'r') as file:
             logs_entries =[]
             # Read each line from the log file and parse it into structured entries
             # Skip empty lines to avoid parsing errors
@@ -117,7 +111,7 @@ def main():
             print("Log file is empty or contains no valid entries")
             return
         
-        logging.basicConfig(filename=output_file_path, level=logging.INFO, format='%(asctime)s: %(message)s', datefmt='%Y-%m-%d %H:%M')
+        logging.basicConfig(filename=OUTPUT_FILE_PATH, level=logging.INFO, format='%(asctime)s: %(message)s', datefmt='%Y-%m-%d %H:%M')
 
         logs_report = analyze_logs(logs_entries)
         for message in logs_report:
@@ -127,7 +121,7 @@ def main():
                 logging.warning(message)
     # Throw an error if the log file is not found or if there are parsing issues
     except FileNotFoundError:
-        print(f"Log file {log_file_path} not found. Please ensure the file exists.")
+        print(f"Log file {LOG_FILE_PATH} not found. Please ensure the file exists.")
     except Exception as e:
         print(f"An error occurred while processing the log file: {e}")
     

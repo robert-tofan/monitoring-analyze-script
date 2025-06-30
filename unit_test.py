@@ -2,6 +2,7 @@ import unittest
 from datetime import datetime, timedelta
 from analyze_log_script import parse_log_entry, analyze_logs, main
 from unittest.mock import patch, mock_open
+from unittest_confg import OUTPUT_FILE, OUTPUT_DIR, LOG_FILE_PATH
 import io
 import sys
 import os
@@ -87,6 +88,7 @@ class TestLogMonitor(unittest.TestCase):
 
     # Test the main function to ensure it handles file reading and writing correctly
     def test_missing_file_handled_gracefully(self):
+        
         # Mock open to raise FileNotFoundError
         with patch('builtins.open', mock_open()) as mock_file:
             mock_file.side_effect = FileNotFoundError("File not found")
@@ -101,21 +103,17 @@ class TestLogMonitor(unittest.TestCase):
             sys.stdout = sys.__stdout__
             output = captured_output.getvalue()
             
-            # Verify the error message was printed
-            self.assertIn("logs_bad_entries.log not found", output)
+            # Check for the exact error message format from your script
+            self.assertIn(f"Log file {LOG_FILE_PATH} not found", output)
 
 if __name__ == '__main__':
     # Create output directory if it doesn't exist
-    output_dir = 'unit_test'
-    os.makedirs(output_dir, exist_ok=True)
-    
-    # Generate timestamp for filename
-    timestamp = datetime.now().strftime('%Y%m%d%H%M')
-    output_file = os.path.join(output_dir, f'output_{timestamp}.log')
+
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
     
     # Run tests with file output
-    with open(output_file, 'w') as f:
+    with open(OUTPUT_FILE, 'w') as f:
         runner = unittest.TextTestRunner(stream=f, verbosity=2)
         unittest.main(testRunner=runner, exit=False)
     
-    print(f"Test results written to: {output_file}")
+    print(f"Test results written to: {OUTPUT_FILE}")

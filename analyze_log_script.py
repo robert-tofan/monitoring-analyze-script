@@ -69,7 +69,7 @@ def analyze_logs(log_entries):
             duration_str = f"{hours}:{minutes:02d}:{seconds:02d}"
             # Check if the job duration exceeds thresholds
             if duration > ERROR_THRESHOLD:
-                report.append(f"ERROR: Job {job_id} ({description}) took too long to complete above threshold of 10 min: {duration_str}")
+                report.append(f"ERROR: Job {job_id} ({description}) took too long to complete above threshhold of 10 min: {duration_str}")
             elif duration > WARNING_THRESHOLD:
                 report.append(f"WARNING: Job {job_id} ({description}) completed on low performance above threshhold of 5 min: {duration_str}")
         elif start_time and not end_time:
@@ -103,7 +103,6 @@ def main():
     output_file_path = f"./output_logs/analysed_logs_{current_time}.log"
     # Set up logging configuration
     try:
-        logging.basicConfig(filename=output_file_path, level=logging.INFO, format='%(asctime)s: %(message)s', datefmt='%Y-%m-%d %H:%M')
         with open(log_file_path, 'r') as file:
             logs_entries =[]
             # Read each line from the log file and parse it into structured entries
@@ -111,7 +110,14 @@ def main():
             for line in file:
                 if line.strip():
                     entry = parse_log_entry(line)
-                    logs_entries.append(entry)
+                    if entry:
+                        logs_entries.append(entry)
+
+        if not logs_entries:
+            print("Log file is empty or contains no valid entries")
+            return
+        
+        logging.basicConfig(filename=output_file_path, level=logging.INFO, format='%(asctime)s: %(message)s', datefmt='%Y-%m-%d %H:%M')
 
         logs_report = analyze_logs(logs_entries)
         for message in logs_report:

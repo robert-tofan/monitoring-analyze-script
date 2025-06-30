@@ -1,0 +1,14 @@
+test_end_without_start (__main__.TestLogMonitor.test_end_without_start) ... ok
+test_job_error_threshold (__main__.TestLogMonitor.test_job_error_threshold) ... ok
+test_job_normal_duration (__main__.TestLogMonitor.test_job_normal_duration) ... ok
+test_job_warning_threshold (__main__.TestLogMonitor.test_job_warning_threshold) ... ok
+test_missing_file_handled_gracefully (__main__.TestLogMonitor.test_missing_file_handled_gracefully) ... ok
+test_parse_invalid_timestamp (__main__.TestLogMonitor.test_parse_invalid_timestamp) ... ok
+test_parse_malformed_line (__main__.TestLogMonitor.test_parse_malformed_line) ... ok
+test_parse_valid_line (__main__.TestLogMonitor.test_parse_valid_line) ... ok
+test_still_running_job (__main__.TestLogMonitor.test_still_running_job) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.003s
+
+OK
